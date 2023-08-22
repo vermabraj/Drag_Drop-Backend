@@ -2,7 +2,9 @@ const { Schema, model } = require("mongoose");
 
 const cartSchema = new Schema(
   {
-    image:String
+    image: {
+      type: String,
+    },
   },
   {
     versionKey: false,
