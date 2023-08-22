@@ -49,7 +49,7 @@ galleryRoute.post("/create", async (req, res) => {
   } catch (err) {
     res.status(400).send({ message: err.message });
   }
-  //fixed
+  //
 });
 
 galleryRoute.patch("/update/:id", async (req, res) => {
