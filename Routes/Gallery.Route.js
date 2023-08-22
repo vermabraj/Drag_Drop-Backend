@@ -42,12 +42,14 @@ galleryRoute.get("/", async (req, res) => {
 
 galleryRoute.post("/create", async (req, res) => {
   let {base64} = req.body
+
   try {
     await GalleryModel.insertMany({image: base64});
     res.status(201).send({ msg: "Product has been added" });
   } catch (err) {
     res.status(400).send({ message: err.message });
   }
+  //fixed
 });
 
 galleryRoute.patch("/update/:id", async (req, res) => {
