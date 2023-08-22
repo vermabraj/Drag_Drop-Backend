@@ -1,57 +1,72 @@
 const { Router } = require("express");
-const { authenticate } = require("../Middlewares/authenticate.middleware");
-
 const { GalleryModel } = require("../Models/Gallery.Model");
+
 const galleryRoute = Router();
 
-// galleryRoute.use(authenticate)
-galleryRoute.get("/", authenticate, async (req, res) => {
-  const { user } = req.body;
-
+galleryRoute.get("/:id", async (req, res) => {
+  const ID = req.params.id;
   try {
-    await GalleryModel.find({ user })
-      .populate("productId")
-      .then((r) => {
-        return res.status(200).send(r);
+    let data = await GalleryModel.find({ _id: ID });
+    res.send(data);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+});
+
+galleryRoute.get("/", async (req, res) => {
+  const title = req.query.title;
+  if (title) {
+    try {
+      let productData = await GalleryModel.find({
+        $and: [{ title: { $regex: `${title}`, $options: "i" } }],
       });
-  } catch (e) {
-    return res.status(400).send(e.message);
+      res.send(productData);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: err.message });
+    }
+  } else if (title) {
+    try {
+      const productData = await GalleryModel.find({
+        title: { $regex: `${title}`, $options: "i" },
+      });
+      res.send(productData);
+    } catch (err) {
+      res.status(500).send({ message: err.message });
+    }
+  } else {
+    const product = await GalleryModel.find();
+    res.send(product);
   }
 });
 
-galleryRoute.post("/add", authenticate, async (req, res) => {
-  const productId = req.body;
-  let { user } = req.body;
-
+galleryRoute.post("/create", async (req, res) => {
   try {
-    let galleryItem = new GalleryModel({ user });
-
     await GalleryModel.insertMany(req.body);
-    return res.status(200).send(galleryItem);
-  } catch (e) {
-    return res.status(400).send(e.message);
+    res.status(201).send({ msg: "Product has been added" });
+  } catch (err) {
+    res.status(400).send({ message: err.message });
   }
 });
 
-galleryRoute.patch("/update/:id", authenticate, async (req, res) => {
-  const _id = req.params.id;
+galleryRoute.patch("/update/:id", async (req, res) => {
+  const ID = req.params.id;
   const payload = req.body;
   try {
-    await GalleryModel.findOneAndUpdate({ _id }, payload);
-    res.send({ msg: `Product with id:${_id} has been updated` });
-  } catch (e) {
-    return res.status(400).send(e.message);
+    await GalleryModel.findByIdAndUpdate({ _id: ID }, payload);
+    res.send({ msg: `Product with id:${ID} has been updated` });
+  } catch (err) {
+    res.status(400).send({ message: err.message });
   }
 });
 
-galleryRoute.delete("/delete/:id", authenticate, async (req, res) => {
-  const _id = req.params.id;
-
+galleryRoute.delete("/delete/:id", async (req, res) => {
+  const ID = req.params.id;
   try {
-    await GalleryModel.findOneAndDelete({ _id });
-    res.send({ msg: `Product with id:${_id} has been deleted` });
-  } catch (e) {
-    return res.status(400).send(e.message);
+    await GalleryModel.findByIdAndDelete({ _id: ID });
+    res.send({ msg: `Product with id:${ID} has been deleted` });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
   }
 });
 
