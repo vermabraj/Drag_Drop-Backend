@@ -41,8 +41,9 @@ galleryRoute.get("/", async (req, res) => {
 });
 
 galleryRoute.post("/create", async (req, res) => {
+  let {base64} = req.body
   try {
-    await GalleryModel.insertMany(req.body);
+    await GalleryModel.create({image:base64});
     res.status(201).send({ msg: "Product has been added" });
   } catch (err) {
     res.status(400).send({ message: err.message });
